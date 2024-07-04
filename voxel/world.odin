@@ -27,7 +27,7 @@ loadStructure :: proc(filepath : string, type : string,game : ^Game) {
 	game.structures[type] = {
 		cubes,types
 	}
-	fmt.println(game.structures[type])
+	//fmt.println(game.structures[type])
 }
 genStructure :: proc(type : string, game : ^Game, x : i16, y : i16, z : i16) {
 	currentBlock : int = 0
@@ -40,36 +40,36 @@ genStructure :: proc(type : string, game : ^Game, x : i16, y : i16, z : i16) {
 	//game.aliveCubes[x][y][z] 
 }
 
-flatLands :: proc(_game : ^Game, x : i16, z : i16, structures : ^[dynamic] WorldStructure, p : []int) {
+flatLands :: proc(game : ^Game, x : i16, z : i16, structures : ^[dynamic] WorldStructure, p : []int) {
 	height := noise.perlin(cast(f32)x/20,0,cast(f32)z/20,p)  + noise.perlin(cast(f32)x/10,0,cast(f32)z/10,p) 
 	highest_point : i16
 	for y : i16 = 1; y < 256; y+=1 { 
 		if  ((y<80 && height<0) || (y<81 && height>=0)) {
-			_game.aliveCubes[x][y][z] = 5
+			game.aliveCubes[x][y][z] = 5
 			highest_point = y
 		}
 		else {
-			_game.aliveCubes[x][y][z] = 255
+			game.aliveCubes[x][y][z] = 255
 		}
 	}
 	if (rl.GetRandomValue(0,200)==1) {
-		tree_type : u8 = 0
+		treetype : u8 = 0
 		if (rl.GetRandomValue(0,5)==1) {
-			tree_type = 1
+			treetype = 1
 		}
-		append(structures,WorldStructure{x,highest_point+1,z,tree_type})			
+		append(structures,WorldStructure{x,highest_point+1,z,treetype})			
 	}
 }
-highLands :: proc(_game : ^Game, x : i16, z : i16, structures : ^[dynamic] WorldStructure, p : []int) { //finished, only need o add structure generation. Overall I am very happy with the result ;)
+highLands :: proc(game : ^Game, x : i16, z : i16, structures : ^[dynamic] WorldStructure, p : []int) { //finished, only need o add structure generation. Overall I am very happy with the result ;)
 	height2 := noise.perlin(cast(f32)x/10,0,cast(f32)z/10,p)  + noise.perlin(cast(f32)x/10,0,cast(f32)z/10,p) 
 	height := noise.perlin(cast(f32)x/80,0,cast(f32)z/80,p)  + noise.perlin(cast(f32)x/80,0,cast(f32)z/80,p);
 	mountain_height := height* 60;
 	for y : i16 = 1; y < 256; y+=1 { 
 		if  ((y<80 && height2<0) || (y<81 && height2>=0)) {
-			_game.aliveCubes[x][y][z] = 2
+			game.aliveCubes[x][y][z] = 2
 			if ((y==79 && height2<0) || (y==80 && height2>=0)) {
-				_game.aliveCubes[x][y][z] = 0
-				_game.aliveCubes[x][y-1][z] = 4
+				game.aliveCubes[x][y][z] = 0
+				game.aliveCubes[x][y-1][z] = 6
 				
 				if rl.GetRandomValue(0,200)==1 {
 					append(structures,WorldStructure{x,y,z,0})	
@@ -79,11 +79,11 @@ highLands :: proc(_game : ^Game, x : i16, z : i16, structures : ^[dynamic] World
 			
 		}
 		else if  (y<=cast(i16)mountain_height+80 && y>79) {
-			_game.aliveCubes[x][y][z] = 2
+			game.aliveCubes[x][y][z] = 2
 			
 			if (y==cast(i16)mountain_height+80) {
-				_game.aliveCubes[x][y][z] = 0
-				_game.aliveCubes[x][y-1][z] = 4
+				game.aliveCubes[x][y][z] = 0
+				game.aliveCubes[x][y-1][z] = 6
 				
 				if rl.GetRandomValue(0,200)==1 {
 					append(structures,WorldStructure{x,y,z,0})	
@@ -93,37 +93,37 @@ highLands :: proc(_game : ^Game, x : i16, z : i16, structures : ^[dynamic] World
 			
 		}
 		else {
-			_game.aliveCubes[x][y][z] = 255
+			game.aliveCubes[x][y][z] = 255
 		}
 		
 	}
 }
-desert :: proc(_game : ^Game, x : i16, z : i16, structures : ^[dynamic]WorldStructure, p : []int) {
+desert :: proc(game : ^Game, x : i16, z : i16, structures : ^[dynamic]WorldStructure, p : []int) {
 	height := noise.perlin(cast(f32)x/20,0,cast(f32)z/20,p)  + noise.perlin(cast(f32)x/10,0,cast(f32)z/10,p) 
 	highest_point : i16
 	for y : i16 = 1; y < 256; y+=1 { 
 		if  ((y<80 && height<0) || (y<81 && height>=0)) {
-			_game.aliveCubes[x][y][z] = 4
+			game.aliveCubes[x][y][z] = 4
 			highest_point = y
 			if (y==79 && height < 0) {
 				if height < -0.7 {
-					_game.aliveCubes[x][y][z] = 12
+					game.aliveCubes[x][y][z] = 12
 				}
 				else if height < -0.6 {
-					_game.aliveCubes[x][y][z] = 0
+					game.aliveCubes[x][y][z] = 0
 					if (rl.GetRandomValue(0,100)==1) {
-						tree_type : u8 = 0
+						treetype : u8 = 0
 						if (rl.GetRandomValue(0,5)==1) {
-							tree_type = 1
+							treetype = 1
 						}
-						append(structures,WorldStructure{x,highest_point+1,z,tree_type})			
+						append(structures,WorldStructure{x,highest_point+1,z,treetype})			
 					}
 				}
 
 			}
 		}
 		else {
-			_game.aliveCubes[x][y][z] = 255
+			game.aliveCubes[x][y][z] = 255
 		}
 	}
 	
@@ -141,7 +141,7 @@ genBiomeTypes :: proc(width : f32, height : f32) -> [64][64]i16 {
     }
     return biomeTypes
 } 
-genWorld :: proc(_game : ^Game) {
+genWorld :: proc(game : ^Game) {
     p := noise.init_permutation()
     structures : [dynamic] WorldStructure
     biomeTypes := genBiomeTypes(28,6)
@@ -151,14 +151,14 @@ genWorld :: proc(_game : ^Game) {
 			chunkZ : int = int(z)/16
 			switch(biomeTypes[chunkX][chunkZ]) {
 				case 0:
-				highLands(_game,x,z,&structures,p);
+				highLands(game,x,z,&structures,p);
         
 				break;
 				case 1:
-				flatLands(_game,x,z,&structures,p);
+				flatLands(game,x,z,&structures,p);
 				break;
 				case 2:
-				desert(_game,x,z,&structures,p);
+				desert(game,x,z,&structures,p);
 				break;
             }
 		}
@@ -167,54 +167,62 @@ genWorld :: proc(_game : ^Game) {
     for structure in structures { //temporary, will be made into a hashmap
 		switch structure.kind {
 			case 0:
-				genStructure("tree",_game,structure.x,structure.y,structure.z)
-				//genTree(_game,structure.x,structure.y,structure.z);
+				genStructure("tree",game,structure.x,structure.y,structure.z)
+				//genTree(game,structure.x,structure.y,structure.z);
 			break;
 			case 1:
-				genStructure("house",_game,structure.x,structure.y,structure.z)
+				genStructure("house",game,structure.x,structure.y,structure.z)
 			break;
 		}
     }
     for x : i16 = 0; x < 32; x+=1 {
         for y : i16 = 0; y < 32; y+=1 {
-            genChunkModel(_game,x,0,y)
+            genChunkModel(game,x,0,y)
             
         }    
     }
 }
-changeBlock :: proc(_game : ^Game, pos : Cube, _type : u8) {
+changeBlock :: proc(game : ^Game, pos : Cube, type : u8) {
 
     if (pos.x>-1 && pos.z > -1 && pos.y > -1) {
 		//check whether the block is air and needs to be replaced
 		//check whether the block is solid and is gonna be destroyed
-        if (_game.aliveCubes[pos.x][pos.y][pos.z] == 255 && _type != 255) || (_game.aliveCubes[pos.x][pos.y][pos.z] != 255 && _type == 255) { 
-            _game.aliveCubes[pos.x][pos.y][pos.z] = _type
+        if (game.aliveCubes[pos.x][pos.y][pos.z] == 255 && type != 255) || (game.aliveCubes[pos.x][pos.y][pos.z] != 255 && type == 255) { 
             chunkPos := Cube{i16(int(pos.x/16)),0,i16(int(pos.z/16))}
-            //get the chunk pos
-            rl.UnloadMesh(_game.meshes[chunkPos.x][chunkPos.z]) //there needs to be some thinking done here because it seems not everything is working correctly
-            _game.meshes[chunkPos.x][chunkPos.z].vertices = nil
-            _game.meshes[chunkPos.x][chunkPos.z].texcoords = nil
-            genChunkModel(_game,chunkPos.x,0,chunkPos.z) 
+            if (type==255) {
+				fmt.println("a");
+				spawnItem(game,f32(pos.x),f32(pos.y),f32(pos.z), game.aliveCubes[pos.x][pos.y][pos.z])
+			}
+			game.aliveCubes[pos.x][pos.y][pos.z] = type
+            
+			rl.UnloadMesh(game.meshes[chunkPos.x][chunkPos.z]) //there needs to be some thinking done here because it seems not everything is working correctly
+            game.meshes[chunkPos.x][chunkPos.z].vertices = nil
+            game.meshes[chunkPos.x][chunkPos.z].texcoords = nil
+            genChunkModel(game,chunkPos.x,0,chunkPos.z) 
         
         }
     }
 }
-updateWorld :: proc(_game :^Game) {
-	chunkCamX := cast(i16)_game.cam.position.x/16
-    chunkCamZ := cast(i16)_game.cam.position.z/16
-    for x : i16 = chunkCamX-_game.renderDistance; x < _game.renderDistance+chunkCamX; x+=1 {
-		for z : i16 = chunkCamZ-_game.renderDistance; z < _game.renderDistance+chunkCamZ; z+=1 {
+
+updateWorld :: proc(game :^Game) {
+	chunkCamX := cast(i16)game.cam.position.x/16
+    chunkCamZ := cast(i16)game.cam.position.z/16
+    for x : i16 = chunkCamX-game.renderDistance; x < game.renderDistance+chunkCamX; x+=1 {
+		for z : i16 = chunkCamZ-game.renderDistance; z < game.renderDistance+chunkCamZ; z+=1 {
 			if (x>-1 && x < 64 && z > -1 && z < 64) {
-				rl.DrawMesh(_game.meshes[x][z],_game.material,rl.MatrixTranslate(1,1,1))
+				rl.DrawMesh(game.meshes[x][z],game.material,rl.MatrixTranslate(-0.5,-0.5,-0.5))
 				
 				
 			}
                 
         }
     }
-	updatePlayer(_game);
+	updatePlayer(game);
+	for val, index in game.items {
+		updateItem(game,&game.items[index])
+	}
 }
 
-setupWorld :: proc(_game : ^Game) {
+setupWorld :: proc(game : ^Game) {
 	
 }

@@ -1,28 +1,29 @@
 package voxel
 import rl "../raylib"
-buildNDestroy :: proc(_game : ^Game) {
-    vec : Cube= {cast(i16)(_game.cam.target.x-_game.cam.position.x),cast(i16)(_game.cam.target.y-_game.cam.position.y),cast(i16)(_game.cam.target.z-_game.cam.position.z)}
-    vec.x += i16(_game.cam.target.x)
-    vec.y += i16(_game.cam.target.y)
-    vec.z += i16(_game.cam.target.z)
+buildNDestroy :: proc(game : ^Game) {
+    vec : Cube= {cast(i16)(game.cam.target.x-game.cam.position.x),cast(i16)(game.cam.target.y-game.cam.position.y),cast(i16)(game.cam.target.z-game.cam.position.z)}
+    vec.x += i16(game.cam.target.x)
+    vec.y += i16(game.cam.target.y)
+    vec.z += i16(game.cam.target.z)
     vec = Cube{i16(int(vec.x)),i16(int(vec.y)),i16(int(vec.z))}
     //fmt.println(vec)
+    
     if (rl.IsMouseButtonDown(.RIGHT)) {
-        changeBlock(_game,vec,0)
+        changeBlock(game,vec,u8(game.playerChoosenBlock))
     }
     if (rl.IsMouseButtonDown(.LEFT)) {
-        changeBlock(_game,vec,255)
+        changeBlock(game,vec,255)
     }
 }
-updatePlayer :: proc(_game : ^Game) {
-    rl.UpdateCamera(&_game.cam,.FIRST_PERSON)
+updatePlayer :: proc(game : ^Game) {
+    rl.UpdateCamera(&game.cam,.FIRST_PERSON)
     if rl.IsKeyDown(.SPACE) {
-        _game.cam.target.y += 1
-        _game.cam.position.y += 1
+        game.cam.target.y += 1
+        game.cam.position.y += 1
     }
     if rl.IsKeyDown(.LEFT_CONTROL) {
-        _game.cam.target.y -= 1
-        _game.cam.position.y -= 1
+        game.cam.target.y -= 1
+        game.cam.position.y -= 1
     }
     if rl.IsKeyDown(.G) {
         rl.rlEnableWireMode()
@@ -30,17 +31,29 @@ updatePlayer :: proc(_game : ^Game) {
     if rl.IsKeyDown(.H) {
         rl.rlDisableWireMode();
     }
-    //x : int = int(_game.cam.position.x)
-    //y : int = int(_game.cam.position.y)
-    //z : int = int(_game.cam.position.z)
-    //if (_game.aliveCubes[x][y-1][z]==255) {
-    //    _game.y_velocity += 0.01
+    if rl.IsKeyDown(.ONE) {
+        game.playerChoosenBlock = 0;
+    }
+    if rl.IsKeyDown(.TWO) {
+        game.playerChoosenBlock = 2;
+    }
+    if rl.IsKeyDown(.THREE) {
+        game.playerChoosenBlock = 4;
+    }
+    if rl.IsKeyDown(.FOUR) {
+        game.playerChoosenBlock = 6;
+    }
+    //x : int = int(game.cam.position.x)
+    //y : int = int(game.cam.position.y)
+    //z : int = int(game.cam.position.z)
+    //if (game.aliveCubes[x][y-1][z]==255) {
+    //    game.y_velocity += 0.01
     //}
     //else {
-    //    _game.y_velocity = 0
+    //    game.y_velocity = 0
     //}
-    //_game.cam.position.y -= _game.y_velocity
-    //_game.cam.target.y -= _game.y_velocity
-    buildNDestroy(_game);
+    //game.cam.position.y -= game.y_velocity
+    //game.cam.target.y -= game.y_velocity
+    buildNDestroy(game);
     //rl.DrawCube({f32(vec.x),f32(vec.y),f32(vec.z)}, 1,1,1,rl.RED)
 }

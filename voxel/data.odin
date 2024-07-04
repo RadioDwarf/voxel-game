@@ -9,6 +9,13 @@ Rect :: struct {
     x : f32,
     y : f32,
 }
+Entity :: struct {
+    x : f32,
+    y : f32,
+    z : f32,
+    type : u8,
+    yVelocity : f32
+}
 Faces :: struct { 
     front : bool,
     back : bool,
@@ -24,11 +31,16 @@ StructureData :: struct {
 Game :: struct #packed {
     cam : rl.Camera3D,
     y_velocity : f32,
+    playerChoosenBlock : int,
     aliveCubes : [1024][257][1024]u8,
     meshes : [64][64]rl.Mesh,
     material : rl.Material,
     renderDistance : i16,
-    structures : map[string]StructureData
+    items : [dynamic]Entity,
+    structures : map[string]StructureData,
+    tick : int,
+    cords : map[u8]Rect, //for chunk meshes
+	colors : map[u8]rl.Color, //for items
 }
 ChunkModel :: struct {
     vertex_count : int,

@@ -102,7 +102,7 @@ addCube :: proc(model : ^ChunkModel, mesh : ^rl.Mesh, x : int, y : int, z : int,
     
 }
 
-genMesh :: proc(_blocks : [dynamic]Cube, _faces : [dynamic]Faces, _types : [dynamic]u8, _ambients : [dynamic]Faces) -> rl.Mesh {
+genMesh :: proc(_blocks : [dynamic]Cube, _faces : [dynamic]Faces, _types : [dynamic]u8, _ambients : [dynamic]Faces, game : ^Game) -> rl.Mesh {
     mesh : rl.Mesh
     trang_count : i32 = 0
     //count the trang count
@@ -119,57 +119,39 @@ genMesh :: proc(_blocks : [dynamic]Cube, _faces : [dynamic]Faces, _types : [dyna
     mesh.vertices = cast(^f32)rl.MemAlloc(cast(u32)mesh.vertexCount*3*size_of(f32))
     mesh.texcoords = cast(^f32)rl.MemAlloc(cast(u32)mesh.vertexCount*2*size_of(f32))
     model := ChunkModel{0,0}
-    cords : map[u8]Rect
-	//needs to be moved into data.odin and made loaded from a file, this is a temporary solution
-    cords[0] = {0.0,0} //grass
-    cords[1] = {0.0626,0} //ambient grass
-    cords[2] = {0.1251,0} //stone
-    cords[3] = {0.1876,0} //ambient stone
-    cords[4] = {0.2501,0} //sand 
-    cords[5] = {0.3126,0} //ambient sand
-    cords[6] = {0.3751,0} //wood
-    cords[7] = {0.4376,0} //ambient wood
-    cords[8] = {0.5001,0} //dirt
-    cords[9] = {0.5626,0} //ambient dirt
-    cords[10] = {0.6251,0} //leaf
-    cords[11] = {0.6876,0} //ambient leaf
-    cords[12] = {0.7501,0} //iron ore
-    cords[13] = {0.8126,0} //ambient iron ore
-    cords[14] = {0.8751,0} //gold ore
-    cords[15] = {0.9376,0} //ambient gold ore
     //go through blocks and add the data to the mesh
     index : int = 0
     for block in _blocks {
-        addCube(&model, &mesh, cast(int)block.x,cast(int)block.y,cast(int)block.z,1,1,1,cords[_types[index]].x,cords[_types[index]].y, _faces[index], _ambients[index])
+        addCube(&model, &mesh, cast(int)block.x,cast(int)block.y,cast(int)block.z,1,1,1,game.cords[_types[index]].x,game.cords[_types[index]].y, _faces[index], _ambients[index])
 
         index+=1
     }
     rl.UploadMesh(&mesh,false)
     return mesh
 }
-checkObscures :: proc(_game : ^Game, x : i16, y : i16, z : i16) -> Faces {
+checkObscures :: proc(game : ^Game, x : i16, y : i16, z : i16) -> Faces {
     faces : Faces = {false, false, false, false, false, false}
-    if (z+1 < 1024) { if (_game.aliveCubes[x][y][z+1]!=255) { faces.back = true } } // back
-    if (z-1> -1) { if (_game.aliveCubes[x][y][z-1]!=255) { faces.front = true } } // front
-    if (y+1 < 256) { if (_game.aliveCubes[x][y+1][z]!=255) { faces.top = true } } // top
-    if (y-1 > -1) { if (_game.aliveCubes[x][y-1][z]!=255) { faces.bottom = true } } // bottom
-    if (x-1 > -1) { if (_game.aliveCubes[x-1][y][z]!=255) { faces.left = true } } // left
-    if (x+1 < 1024) { if (_game.aliveCubes[x+1][y][z]!=255) { faces.right = true } } // right
+    if (z+1 < 1024) { if (game.aliveCubes[x][y][z+1]!=255) { faces.back = true } } // back
+    if (z-1> -1) { if (game.aliveCubes[x][y][z-1]!=255) { faces.front = true } } // front
+    if (y+1 < 256) { if (game.aliveCubes[x][y+1][z]!=255) { faces.top = true } } // top
+    if (y-1 > -1) { if (game.aliveCubes[x][y-1][z]!=255) { faces.bottom = true } } // bottom
+    if (x-1 > -1) { if (game.aliveCubes[x-1][y][z]!=255) { faces.left = true } } // left
+    if (x+1 < 1024) { if (game.aliveCubes[x+1][y][z]!=255) { faces.right = true } } // right
 
     return faces
 }
-checkAmbience :: proc(_game : ^Game, x : i16, y : i16, z : i16) -> Faces {
+checkAmbience :: proc(game : ^Game, x : i16, y : i16, z : i16) -> Faces {
     faces : Faces = {false, false, false, false, false, false} //I reuse the data type for simplicity sake 
     if (y+1<256) {
-        if (z+1 < 1024) { if (_game.aliveCubes[x][y+1][z+1]!=255) { faces.back = true } } // back
-        if (z-1 > 0) { if (_game.aliveCubes[x][y+1][z-1]!=255) { faces.front = true } } // front
-        if (x > 0) { if (_game.aliveCubes[x-1][y+1][z]!=255) { faces.left = true } } // left
-        if (x+1 < 1024) { if (_game.aliveCubes[x+1][y+1][z]!=255) { faces.right = true } } // right
+        if (z+1 < 1024) { if (game.aliveCubes[x][y+1][z+1]!=255) { faces.back = true } } // back
+        if (z-1 > 0) { if (game.aliveCubes[x][y+1][z-1]!=255) { faces.front = true } } // front
+        if (x > 0) { if (game.aliveCubes[x-1][y+1][z]!=255) { faces.left = true } } // left
+        if (x+1 < 1024) { if (game.aliveCubes[x+1][y+1][z]!=255) { faces.right = true } } // right
     }
     
     return faces
 }
-genChunkModel :: proc(_game : ^Game, x : i16, y : i16, z : i16) {
+genChunkModel :: proc(game : ^Game, x : i16, y : i16, z : i16) {
 	//setup data
     blocks : [dynamic]Cube
     faces : [dynamic]Faces
@@ -181,17 +163,17 @@ genChunkModel :: proc(_game : ^Game, x : i16, y : i16, z : i16) {
             for chunky : i16 = 0; chunky < 256; chunky+=1 { 
 				//don't change the 0s to 1s, doesn't change anything gameplay wise and helps with the performance quite a bit 
                 if(chunkx+x*16>0 && chunky+y*16 > 0 && chunkz+z*16>0 && chunkx+x*16<1024 && chunky+y*16 <256 && chunkz+z*16<1024) {
-                    if (_game.aliveCubes[chunkx+x*16][chunky+y*16][chunkz+z*16]!=255) {
+                    if (game.aliveCubes[chunkx+x*16][chunky+y*16][chunkz+z*16]!=255) {
                         append(&blocks,Cube{chunkx+x*16,chunky+y*16,chunkz+z*16}) //add cube poses
-                        append(&faces,checkObscures(_game,chunkx+x*16,chunky+y*16,chunkz+z*16)) //add visible faces
-                        append(&ambients,checkAmbience(_game,chunkx+x*16,chunky+y*16,chunkz+z*16)) //add the checks for lights
-                        append(&types,_game.aliveCubes[chunkx+x*16][chunky+y*16][chunkz+z*16]) //add the block types
+                        append(&faces,checkObscures(game,chunkx+x*16,chunky+y*16,chunkz+z*16)) //add visible faces
+                        append(&ambients,checkAmbience(game,chunkx+x*16,chunky+y*16,chunkz+z*16)) //add the checks for lights
+                        append(&types,game.aliveCubes[chunkx+x*16][chunky+y*16][chunkz+z*16]) //add the block types
                     }
                 }
                 
             }
         }
     }
-    _game.meshes[x][z] = genMesh(blocks,faces,types,ambients)
+    game.meshes[x][z] = genMesh(blocks,faces,types,ambients,game)
 }
 
