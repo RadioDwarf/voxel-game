@@ -1,19 +1,85 @@
 package voxel
 import rl "../raylib"
-buildNDestroy :: proc(game : ^Game) {
-    vec : Cube= {cast(i16)(game.cam.target.x-game.cam.position.x),cast(i16)(game.cam.target.y-game.cam.position.y),cast(i16)(game.cam.target.z-game.cam.position.z)}
-    vec.x += i16(game.cam.target.x)
-    vec.y += i16(game.cam.target.y)
-    vec.z += i16(game.cam.target.z)
-    vec = Cube{i16(int(vec.x)),i16(int(vec.y)),i16(int(vec.z))}
-    //fmt.println(vec)
+import "core:math"
+import "core:fmt"
+
+// Vector structure for 3D coordinates
+
+// Normalizes a vector
+
+
+// Checks if a voxel exists at the given position in the game's voxel array
+get_voxel_id :: proc(x: f32, y: f32, z: f32, game: ^Game) -> bool {
+    ix, iy, iz := int(x), int(y), int(z)
+    if ix >= 0 && ix < 1024 && iy >= 0 && iy < 256 && iz >= 0 && iz < 1024 {
+        return game.aliveCubes[ix][iy][iz] != 255
+    }
+    return false
+}
+
+// Calculates the ray and checks for voxel hits
+calcRay :: proc(pos: Cube, endPos: Cube, speed: f32, game: ^Game, mode : bool) -> Cube {
+    direction := rl.Vector3Normalize(rl.Vector3{f32(endPos.x - pos.x), f32(endPos.y - pos.y), f32(endPos.z - pos.z)})
+    direction = rl.Vector3{f32(direction.x / 12.0), f32(direction.y / 12.0), f32(direction.z / 12.0)}
     
-    if (rl.IsMouseButtonDown(.RIGHT)) {
-        changeBlock(game,vec,u8(game.playerChoosenBlock))
+    position := rl.Vector3{f32(pos.x) - 0.5, f32(pos.y) + 0.72, f32(pos.z) - 0.5}
+    max_distance := 6
+
+    for i : int = 0; i < 8*25; i+=1 {
+        oldPos := position
+        position = rl.Vector3{position.x + direction.x, position.y + direction.y, position.z + direction.z}
+        //fmt.println(position)
+        if get_voxel_id(position.x, position.y, position.z, game) {
+            if mode {
+                return Cube{
+                    x = i16(position.x),
+                    y = i16(position.y),
+                    z = i16(position.z)
+                }
+            }
+            else {
+                return Cube{
+                    x = i16(oldPos.x),
+                    y = i16(oldPos.y),
+                    z = i16(oldPos.z),
+                }
+            }
+            
+        }
+    }
+
+    // No hit
+    return pos
+}
+buildNDestroy :: proc(game : ^Game) {
+    targetPos := game.cam.target-game.cam.position
+    targetPos+= game.cam.position
+    targetPosCubified := Cube{i16(math.round(targetPos.x)),i16(math.round(targetPos.y)),i16(math.round(targetPos.z))}
+    currentPos : Cube = {i16(math.round(game.cam.position.x)),i16(math.round(game.cam.position.y)),i16(math.round(game.cam.position.z))}
+    newPos := calcRay(currentPos,targetPosCubified,12,game,false)
+        
+    if (rl.IsMouseButtonPressed(.RIGHT)) {
+        if newPos != currentPos {
+            changeBlock(game,newPos,u8(game.playerChoosenBlock))
+        }
     }
     if (rl.IsMouseButtonDown(.LEFT)) {
-        changeBlock(game,vec,255)
+        newPos = calcRay(currentPos,targetPosCubified,12,game,true)
+        if newPos != currentPos {
+            changeBlock(game,newPos,255)
+        
+        }
+        
     }
+    if newPos!= currentPos {
+        rl.DrawCube({f32(newPos.x),f32(newPos.y),f32(newPos.z)},1,1,1,rl.WHITE)
+    
+    }
+     
+    //rl.DrawCube({f32(newPos.x),f32(newPos.y),f32(newPos.z)},1,1,1,rl.WHITE)
+    //rl.DrawCube({f32(currentPos.x),f32(currentPos.y),f32(currentPos.z)},1,1,1,rl.WHITE)
+
+    
 }
 updatePlayer :: proc(game : ^Game) {
     rl.UpdateCamera(&game.cam,.FIRST_PERSON)

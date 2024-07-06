@@ -25,8 +25,8 @@ setupGame :: proc(game : ^Game, width : i32, height : i32) {
     game.cords[9] = {0.5626,0} //ambient dirt
     game.cords[10] = {0.6251,0} //leaf
     game.cords[11] = {0.6876,0} //ambient leaf
-    game.cords[12] = {0.7501,0} //iron ore
-    game.cords[13] = {0.8126,0} //ambient iron ore
+    game.cords[12] = {0.7501,0} //water
+    game.cords[13] = {0.8126,0} //ambient water
     game.cords[14] = {0.8751,0} //gold ore
     game.cords[15] = {0.9376,0} //ambient gold ore
     

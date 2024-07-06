@@ -65,6 +65,7 @@ highLands :: proc(game : ^Game, x : i16, z : i16, structures : ^[dynamic] WorldS
 	height := noise.perlin(cast(f32)x/80,0,cast(f32)z/80,p)  + noise.perlin(cast(f32)x/80,0,cast(f32)z/80,p);
 	mountain_height := height* 60;
 	for y : i16 = 1; y < 256; y+=1 { 
+		game.aliveCubes[x][y][z] = 255
 		if  ((y<80 && height2<0) || (y<81 && height2>=0)) {
 			game.aliveCubes[x][y][z] = 2
 			if ((y==79 && height2<0) || (y==80 && height2>=0)) {
@@ -91,9 +92,6 @@ highLands :: proc(game : ^Game, x : i16, z : i16, structures : ^[dynamic] WorldS
 				
 			}
 			
-		}
-		else {
-			game.aliveCubes[x][y][z] = 255
 		}
 		
 	}
