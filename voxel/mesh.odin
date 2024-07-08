@@ -3,8 +3,8 @@ import rl "../raylib"
 
 genCam :: proc() -> rl.Camera3D { //setup up the camera will be moved into the player controller file once one is created and needed
     cam : rl.Camera3D
-    cam.position = {5,5,5};
-    cam.target = {0,0,0}
+    cam.position = {5,105,5};
+    cam.target = {0,100,0}
     cam.up = {0,1,0}
     cam.fovy = 45
     
@@ -12,13 +12,13 @@ genCam :: proc() -> rl.Camera3D { //setup up the camera will be moved into the p
     return cam
 }
 
-setTriangle :: proc(model : ^ChunkModel,mesh : ^rl.Mesh,x : int, y : int, z : int, tx1 : f32,  tx2 : f32) {
+setVertex :: proc(model : ^ChunkModel,mesh : ^rl.Mesh,x : f32, y : f32, z : f32, tx1 : f32,  tx2 : f32) {
     //quick and dirt solution, good enuf
-    mesh.vertices[model.vertex_count] = cast(f32)x
+    mesh.vertices[model.vertex_count] = x
     model.vertex_count+=1;
-    mesh.vertices[model.vertex_count] = cast(f32)y
+    mesh.vertices[model.vertex_count] = y
     model.vertex_count+=1;
-    mesh.vertices[model.vertex_count] = cast(f32)z
+    mesh.vertices[model.vertex_count] = z
     model.vertex_count+=1;
     mesh.texcoords[model.text_count] = tx1
     model.text_count+=1
@@ -32,72 +32,73 @@ b2f32 :: proc(boolean : bool) -> f32 {
     }
     return 0;
 }
-addCube :: proc(model : ^ChunkModel, mesh : ^rl.Mesh, x : int, y : int, z : int, width : int, height : int, length : int, tx1 : f32, tx2 : f32, face : Faces, ambients : Faces) {
+addCube :: proc(model : ^ChunkModel, mesh : ^rl.Mesh, x : f32, y : f32, z : f32, width : f32, height : f32, length : f32, tx1 : f32, tx2 : f32, face : Faces, ambients : Faces) {
     //I hate this
     //Gonna add a file that defines all the faces
     //front face
+    tx_step : f32 = 1.0 / 128.0;
     if (!face.front) {
-        ft := 0.0626 + b2f32(ambients.front)
-        setTriangle(model, mesh, x, y, z, tx1 + ft, tx2 + ft);                      // Bottom-left
-        setTriangle(model, mesh, x + length, y, z, tx1 + ft, tx2 + ft);             // Bottom-right
-        setTriangle(model, mesh, x + length, y + height, z, tx1 + ft, tx2 + ft);    // Top-right
-        setTriangle(model, mesh, x, y, z, tx1 + ft, tx2 + ft);                      // Bottom-left
-        setTriangle(model, mesh, x + length, y + height, z, tx1 + ft, tx2 + ft);    // Top-right
-        setTriangle(model, mesh, x, y + height, z, tx1 + ft, tx2 + ft);             // Top-left        
+        ft := tx_step + b2f32(ambients.front)
+        setVertex(model, mesh, x, y, z, tx1 + ft, tx2);                      // Bottom-left
+        setVertex(model, mesh, x + length, y, z, tx1 + ft, tx2);             // Bottom-right
+        setVertex(model, mesh, x + length, y + height, z, tx1 + ft, tx2);    // Top-right
+        setVertex(model, mesh, x, y, z, tx1 + ft, tx2 + ft);                      // Bottom-left
+        setVertex(model, mesh, x + length, y + height, z, tx1 + ft, tx2);    // Top-right
+        setVertex(model, mesh, x, y + height, z, tx1 + ft, tx2);             // Top-left        
     }
 
     // Back face
     if (!face.back) {
-        bk := 0.0626 + b2f32(ambients.back)
-        setTriangle(model, mesh, x, y, z + width, tx1 + bk, tx2 + bk);                  // Bottom-left
-        setTriangle(model, mesh, x + length, y, z + width, tx1 + bk, tx2 + bk);         // Bottom-right
-        setTriangle(model, mesh, x + length, y + height, z + width, tx1 + bk, tx2 + bk);// Top-right
-        setTriangle(model, mesh, x, y, z + width, tx1 + bk, tx2 + bk);                  // Bottom-left
-        setTriangle(model, mesh, x + length, y + height, z + width, tx1 + bk, tx2 + bk);// Top-right
-        setTriangle(model, mesh, x, y + height, z + width, tx1 + bk, tx2 + bk);         // Top-left    
+        bk := tx_step + b2f32(ambients.back)
+        setVertex(model, mesh, x, y, z + width, tx1 + bk, tx2);                  // Bottom-left
+        setVertex(model, mesh, x + length, y, z + width, tx1 + bk, tx2);         // Bottom-right
+        setVertex(model, mesh, x + length, y + height, z + width, tx1 + bk, tx2);// Top-right
+        setVertex(model, mesh, x, y, z + width, tx1 + bk, tx2 + bk);                  // Bottom-left
+        setVertex(model, mesh, x + length, y + height, z + width, tx1 + bk, tx2);// Top-right
+        setVertex(model, mesh, x, y + height, z + width, tx1 + bk, tx2);         // Top-left    
     }
 
     // Left face
     if (!face.left) {
-        lt := 0.0626 + b2f32(ambients.left)
-        setTriangle(model, mesh, x, y, z, tx1 + lt, tx2 + lt);                      // Bottom-left
-        setTriangle(model, mesh, x, y + height, z, tx1 + lt, tx2 + lt);             // Top-left
-        setTriangle(model, mesh, x, y + height, z + width, tx1 + lt, tx2 + lt);     // Top-right
-        setTriangle(model, mesh, x, y, z, tx1 + lt, tx2 + lt);                      // Bottom-left
-        setTriangle(model, mesh, x, y + height, z + width, tx1 + lt, tx2 + lt);     // Top-right
-        setTriangle(model, mesh, x, y, z + width, tx1 + lt, tx2 + lt);              // Bottom-right    
+        lt := tx_step + b2f32(ambients.left)
+        setVertex(model, mesh, x, y, z, tx1 + lt, tx2);                      // Bottom-left
+        setVertex(model, mesh, x, y + height, z, tx1 + lt, tx2);             // Top-left
+        setVertex(model, mesh, x, y + height, z + width, tx1 + lt, tx2);     // Top-right
+        setVertex(model, mesh, x, y, z, tx1 + lt, tx2 + lt);                      // Bottom-left
+        setVertex(model, mesh, x, y + height, z + width, tx1 + lt, tx2);     // Top-right
+        setVertex(model, mesh, x, y, z + width, tx1 + lt, tx2);              // Bottom-right    
     }
 
     // Right face
     if (!face.right) {
-        rt := 0.0626 + b2f32(ambients.right)
-        setTriangle(model, mesh, x + length, y, z, tx1 + rt, tx2 + rt);                 // Bottom-left
-        setTriangle(model, mesh, x + length, y + height, z, tx1 + rt, tx2 + rt);        // Top-left
-        setTriangle(model, mesh, x + length, y + height, z + width, tx1 + rt, tx2 + rt);// Top-right
-        setTriangle(model, mesh, x + length, y, z, tx1 + rt, tx2 + rt);                 // Bottom-left
-        setTriangle(model, mesh, x + length, y + height, z + width, tx1 + rt, tx2 + rt);// Top-right
-        setTriangle(model, mesh, x + length, y, z + width, tx1 + rt, tx2 + rt);         // Bottom-right    
+        rt := tx_step + b2f32(ambients.right)
+        setVertex(model, mesh, x + length, y, z, tx1 + rt, tx2);                 // Bottom-left
+        setVertex(model, mesh, x + length, y + height, z, tx1 + rt, tx2 );        // Top-left
+        setVertex(model, mesh, x + length, y + height, z + width, tx1 + rt, tx2 );// Top-right
+        setVertex(model, mesh, x + length, y, z, tx1 + rt, tx2 + rt);                 // Bottom-left
+        setVertex(model, mesh, x + length, y + height, z + width, tx1 + rt, tx2);// Top-right
+        setVertex(model, mesh, x + length, y, z + width, tx1 + rt, tx2 );         // Bottom-right    
     }
 
     // Top face
     if (!face.top) {
-        setTriangle(model,mesh, x, y + height, z, tx1, tx2);            // Bottom-left
-        setTriangle(model,mesh, x + length, y + height, z, tx1, tx2);   // Bottom-right
-        setTriangle(model,mesh, x + length, y + height, z + width, tx1, tx2); // Top-right
-        setTriangle(model,mesh, x, y + height, z, tx1, tx2);            // Bottom-left
-        setTriangle(model,mesh, x + length, y + height, z + width, tx1, tx2); // Top-right
-        setTriangle(model,mesh, x, y + height, z + width, tx1, tx2);    // Top-left
+        setVertex(model,mesh, x, y + height, z, tx1, tx2);            // Bottom-left
+        setVertex(model,mesh, x + length, y + height, z, tx1, tx2);   // Bottom-right
+        setVertex(model,mesh, x + length, y + height, z + width, tx1, tx2); // Top-right
+        setVertex(model,mesh, x, y + height, z, tx1, tx2);            // Bottom-left
+        setVertex(model,mesh, x + length, y + height, z + width, tx1, tx2); // Top-right
+        setVertex(model,mesh, x, y + height, z + width, tx1, tx2);    // Top-left
             
     }
     
     // Bottom face
     if (!face.bottom) {
-        setTriangle(model,mesh, x, y, z, tx1, tx2);            // Bottom-left
-        setTriangle(model,mesh, x + length, y, z, tx1, tx2);   // Bottom-right
-        setTriangle(model,mesh, x + length, y, z + width, tx1, tx2); // Top-right
-        setTriangle(model,mesh, x, y, z, tx1, tx2);            // Bottom-left
-        setTriangle(model,mesh, x + length, y, z + width, tx1, tx2); // Top-right
-        setTriangle(model,mesh, x, y, z + width, tx1, tx2);    // Top-left
+        setVertex(model,mesh, x, y, z, tx1, tx2);            // Bottom-left
+        setVertex(model,mesh, x + length, y, z, tx1, tx2);   // Bottom-right
+        setVertex(model,mesh, x + length, y, z + width, tx1, tx2); // Top-right
+        setVertex(model,mesh, x, y, z, tx1, tx2);            // Bottom-left
+        setVertex(model,mesh, x + length, y, z + width, tx1, tx2); // Top-right
+        setVertex(model,mesh, x, y, z + width, tx1, tx2);    // Top-left
     }
     
 }
@@ -122,7 +123,7 @@ genMesh :: proc(_blocks : [dynamic]Cube, _faces : [dynamic]Faces, _types : [dyna
     //go through blocks and add the data to the mesh
     index : int = 0
     for block in _blocks {
-        addCube(&model, &mesh, cast(int)block.x,cast(int)block.y,cast(int)block.z,1,1,1,game.cords[_types[index]].x,game.cords[_types[index]].y, _faces[index], _ambients[index])
+        addCube(&model, &mesh, cast(f32)block.x,cast(f32)block.y,cast(f32)block.z,1,1,1,game.cords[_types[index]].x,game.cords[_types[index]].y, _faces[index], _ambients[index])
 
         index+=1
     }

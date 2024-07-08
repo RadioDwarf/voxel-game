@@ -7,7 +7,8 @@ import "core:fmt"
 
 // Normalizes a vector
 
-
+COLLOFSSET :: #config(COLLOFSSET, 0.05)
+COLLSIZE :: #config(COLLSIZE,0.5)
 // Checks if a voxel exists at the given position in the game's voxel array
 get_voxel_id :: proc(x: f32, y: f32, z: f32, game: ^Game) -> bool {
     ix, iy, iz := int(x), int(y), int(z)
@@ -20,12 +21,12 @@ get_voxel_id :: proc(x: f32, y: f32, z: f32, game: ^Game) -> bool {
 // Calculates the ray and checks for voxel hits
 calcRay :: proc(pos: Cube, endPos: Cube, speed: f32, game: ^Game, mode : bool) -> Cube {
     direction := rl.Vector3Normalize(rl.Vector3{f32(endPos.x - pos.x), f32(endPos.y - pos.y), f32(endPos.z - pos.z)})
-    direction = rl.Vector3{f32(direction.x / 12.0), f32(direction.y / 12.0), f32(direction.z / 12.0)}
+    direction = rl.Vector3{f32(direction.x / 24.0), f32(direction.y / 24.0), f32(direction.z / 24.0)}
     
-    position := rl.Vector3{f32(pos.x) - 0.5, f32(pos.y) + 0.72, f32(pos.z) - 0.5}
+    position := rl.Vector3{f32(pos.x), f32(pos.y) + 0.72, f32(pos.z)}
     max_distance := 6
 
-    for i : int = 0; i < 8*25; i+=1 {
+    for i : int = 0; i < 8*50; i+=1 {
         oldPos := position
         position = rl.Vector3{position.x + direction.x, position.y + direction.y, position.z + direction.z}
         //fmt.println(position)
@@ -58,7 +59,7 @@ buildNDestroy :: proc(game : ^Game) {
     currentPos : Cube = {i16(math.round(game.cam.position.x)),i16(math.round(game.cam.position.y)),i16(math.round(game.cam.position.z))}
     newPos := calcRay(currentPos,targetPosCubified,12,game,false)
         
-    if (rl.IsMouseButtonPressed(.RIGHT)) {
+    if (rl.IsMouseButtonDown(.RIGHT)) {
         if newPos != currentPos {
             changeBlock(game,newPos,u8(game.playerChoosenBlock))
         }
@@ -83,14 +84,7 @@ buildNDestroy :: proc(game : ^Game) {
 }
 updatePlayer :: proc(game : ^Game) {
     rl.UpdateCamera(&game.cam,.FIRST_PERSON)
-    if rl.IsKeyDown(.SPACE) {
-        game.cam.target.y += 1
-        game.cam.position.y += 1
-    }
-    if rl.IsKeyDown(.LEFT_CONTROL) {
-        game.cam.target.y -= 1
-        game.cam.position.y -= 1
-    }
+    
     if rl.IsKeyDown(.G) {
         rl.rlEnableWireMode()
     }
@@ -109,17 +103,50 @@ updatePlayer :: proc(game : ^Game) {
     if rl.IsKeyDown(.FOUR) {
         game.playerChoosenBlock = 6;
     }
-    //x : int = int(game.cam.position.x)
-    //y : int = int(game.cam.position.y)
-    //z : int = int(game.cam.position.z)
-    //if (game.aliveCubes[x][y-1][z]==255) {
-    //    game.y_velocity += 0.01
-    //}
-    //else {
-    //    game.y_velocity = 0
-    //}
-    //game.cam.position.y -= game.y_velocity
-    //game.cam.target.y -= game.y_velocity
+    x : int = int(math.round(game.cam.position.x))
+    y : int = int(math.round(game.cam.position.y))
+    z : int = int(math.round(game.cam.position.z))
+    
+    if game.aliveCubes[int(math.round(game.cam.position.x-COLLSIZE))][y-1][z]!=255 || game.aliveCubes[int(math.round(game.cam.position.x-COLLSIZE))][y][z]!=255 {
+        game.cam.position.x = f32(x) + COLLOFSSET;
+        game.cam.target.x += COLLOFSSET;
+    }
+    if game.aliveCubes[int(math.round(game.cam.position.x+COLLSIZE))][y-1][z]!=255 || game.aliveCubes[int(math.round(game.cam.position.x+COLLSIZE))][y][z]!=255 {
+        game.cam.position.x = f32(x) -COLLOFSSET;
+        game.cam.target.x -= COLLOFSSET;
+    }
+    if game.aliveCubes[x][y-1][int(math.round(game.cam.position.z-COLLSIZE))]!=255 || game.aliveCubes[x][y][int(math.round(game.cam.position.z-COLLSIZE))]!=255 {
+        game.cam.position.z = f32(z) + COLLOFSSET;
+        game.cam.target.z += COLLOFSSET;
+    }
+    if game.aliveCubes[x][y-1][int(math.round(game.cam.position.z+COLLSIZE))]!=255 || game.aliveCubes[x][y][int(math.round(game.cam.position.z+COLLSIZE))]!=255 {
+        game.cam.position.z = f32(z) - COLLOFSSET;
+        game.cam.target.z -= COLLOFSSET;
+    }
+    colldFromTop : bool = false;
+    if (y>-1 && y<256) {
+        if (game.aliveCubes[x][y][z]!=255) {
+            game.y_velocity *= -0.5;
+            colldFromTop = true;
+        }
+    }
+    if (y-2<256 && y-2>-1) {
+        if (game.aliveCubes[x][y-2][z]==255) {
+            game.y_velocity += 0.01
+        }
+        else {
+            game.y_velocity = 0
+            if rl.IsKeyDown(.SPACE) && !colldFromTop {
+                game.y_velocity -= 0.2
+            }
+        }
+    }
+    else {
+        game.y_velocity += 0.01
+    }
+    
+    game.cam.position.y -= game.y_velocity
+    game.cam.target.y -= game.y_velocity
     buildNDestroy(game);
     //rl.DrawCube({f32(vec.x),f32(vec.y),f32(vec.z)}, 1,1,1,rl.RED)
 }
