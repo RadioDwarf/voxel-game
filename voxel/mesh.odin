@@ -36,48 +36,48 @@ addCube :: proc(model : ^ChunkModel, mesh : ^rl.Mesh, x : f32, y : f32, z : f32,
     //I hate this
     //Gonna add a file that defines all the faces
     //front face
-    tx_step : f32 = 1.0 / 128.0;
+    tx_step : f32 = 0.51;
     if (!face.front) {
         ft := tx_step + b2f32(ambients.front)
-        setVertex(model, mesh, x, y, z, tx1 + ft, tx2);                      // Bottom-left
-        setVertex(model, mesh, x + length, y, z, tx1 + ft, tx2);             // Bottom-right
-        setVertex(model, mesh, x + length, y + height, z, tx1 + ft, tx2);    // Top-right
-        setVertex(model, mesh, x, y, z, tx1 + ft, tx2 + ft);                      // Bottom-left
-        setVertex(model, mesh, x + length, y + height, z, tx1 + ft, tx2);    // Top-right
-        setVertex(model, mesh, x, y + height, z, tx1 + ft, tx2);             // Top-left        
+        setVertex(model, mesh, x, y, z, tx1,ft);                      // Bottom-left
+        setVertex(model, mesh, x + length, y, z, tx1 , ft);             // Bottom-right
+        setVertex(model, mesh, x + length, y + height, z, tx1, ft);    // Top-right
+        setVertex(model, mesh, x, y, z, tx1 , tx2 + ft);                      // Bottom-left
+        setVertex(model, mesh, x + length, y + height, z, tx1, ft);    // Top-right
+        setVertex(model, mesh, x, y + height, z, tx1 , ft);             // Top-left        
     }
 
     // Back face
     if (!face.back) {
         bk := tx_step + b2f32(ambients.back)
-        setVertex(model, mesh, x, y, z + width, tx1 + bk, tx2);                  // Bottom-left
-        setVertex(model, mesh, x + length, y, z + width, tx1 + bk, tx2);         // Bottom-right
-        setVertex(model, mesh, x + length, y + height, z + width, tx1 + bk, tx2);// Top-right
-        setVertex(model, mesh, x, y, z + width, tx1 + bk, tx2 + bk);                  // Bottom-left
-        setVertex(model, mesh, x + length, y + height, z + width, tx1 + bk, tx2);// Top-right
-        setVertex(model, mesh, x, y + height, z + width, tx1 + bk, tx2);         // Top-left    
+        setVertex(model, mesh, x, y, z + width, tx1 , bk);                  // Bottom-left
+        setVertex(model, mesh, x + length, y, z + width, tx1 , bk);         // Bottom-right
+        setVertex(model, mesh, x + length, y + height, z + width, tx1 , bk);// Top-right
+        setVertex(model, mesh, x, y, z + width, tx1 ,bk);                  // Bottom-left
+        setVertex(model, mesh, x + length, y + height, z + width, tx1 , bk);// Top-right
+        setVertex(model, mesh, x, y + height, z + width, tx1 , bk);         // Top-left    
     }
 
     // Left face
     if (!face.left) {
         lt := tx_step + b2f32(ambients.left)
-        setVertex(model, mesh, x, y, z, tx1 + lt, tx2);                      // Bottom-left
-        setVertex(model, mesh, x, y + height, z, tx1 + lt, tx2);             // Top-left
-        setVertex(model, mesh, x, y + height, z + width, tx1 + lt, tx2);     // Top-right
-        setVertex(model, mesh, x, y, z, tx1 + lt, tx2 + lt);                      // Bottom-left
-        setVertex(model, mesh, x, y + height, z + width, tx1 + lt, tx2);     // Top-right
-        setVertex(model, mesh, x, y, z + width, tx1 + lt, tx2);              // Bottom-right    
+        setVertex(model, mesh, x, y, z, tx1 , lt);                      // Bottom-left
+        setVertex(model, mesh, x, y + height, z, tx1 , lt);             // Top-left
+        setVertex(model, mesh, x, y + height, z + width, tx1 , lt);     // Top-right
+        setVertex(model, mesh, x, y, z, tx1 , tx2 + lt);                      // Bottom-left
+        setVertex(model, mesh, x, y + height, z + width, tx1 , lt);     // Top-right
+        setVertex(model, mesh, x, y, z + width, tx1 , lt);              // Bottom-right    
     }
 
     // Right face
     if (!face.right) {
         rt := tx_step + b2f32(ambients.right)
-        setVertex(model, mesh, x + length, y, z, tx1 + rt, tx2);                 // Bottom-left
-        setVertex(model, mesh, x + length, y + height, z, tx1 + rt, tx2 );        // Top-left
-        setVertex(model, mesh, x + length, y + height, z + width, tx1 + rt, tx2 );// Top-right
-        setVertex(model, mesh, x + length, y, z, tx1 + rt, tx2 + rt);                 // Bottom-left
-        setVertex(model, mesh, x + length, y + height, z + width, tx1 + rt, tx2);// Top-right
-        setVertex(model, mesh, x + length, y, z + width, tx1 + rt, tx2 );         // Bottom-right    
+        setVertex(model, mesh, x + length, y, z, tx1 , rt);                 // Bottom-left
+        setVertex(model, mesh, x + length, y + height, z, tx1 ,  rt);        // Top-left
+        setVertex(model, mesh, x + length, y + height, z + width, tx1 , rt);// Top-right
+        setVertex(model, mesh, x + length, y, z, tx1, rt);                 // Bottom-left
+        setVertex(model, mesh, x + length, y + height, z + width, tx1 , rt);// Top-right
+        setVertex(model, mesh, x + length, y, z + width, tx1 , rt );         // Bottom-right    
     }
 
     // Top face

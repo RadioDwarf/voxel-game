@@ -14,7 +14,8 @@ Entity :: struct {
     y : f32,
     z : f32,
     type : u8,
-    yVelocity : f32
+    yVelocity : f32,
+    alive : bool
 }
 Faces :: struct { 
     front : bool,

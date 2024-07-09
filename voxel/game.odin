@@ -13,7 +13,6 @@ setupGame :: proc(game : ^Game, width : i32, height : i32) {
     game.playerChoosenBlock = 0;
     for i : i32 = 0; i < 24; i += 1 {
         game.cords[u8(i)] = {f32(i) / 128.0+0.0000001, 0.0};
-        fmt.println("Cord ", i, ": ", game.cords[u8(i)]);
     }
     
 	//setup raylib stuff
@@ -24,9 +23,9 @@ setupGame :: proc(game : ^Game, width : i32, height : i32) {
     //load structures
     loadStructure("data/structures/house.struct","house",game);
     loadStructure("data/structures/tree.struct","tree",game);
-    texture := rl.LoadImage("textures/texture_pack2.png");
+    texture := rl.LoadImage("textures/texture_pack3.png");
     for x : i32 = 0; x < 16; x+=1 {
-        game.colors[u8(x)] = rl.GetImageColor(texture,x*8,0)
+        game.colors[u8(x)] = rl.GetImageColor(texture,x,0)
         fmt.println(game.colors[u8(x)])
     }
     rl.UnloadImage(texture);
@@ -56,7 +55,7 @@ runGame :: proc(game : ^Game, width : i32, height : i32) {
         rl.BeginMode3D(game.cam);
 		updateWorld(game);
         rl.EndMode3D();
-        
+        rl.DrawRectangle(600-64/2,700,64,64,game.colors[u8(game.playerChoosenBlock*2)])
         rl.DrawFPS(0,0);
     }
 }

@@ -59,12 +59,12 @@ buildNDestroy :: proc(game : ^Game) {
     currentPos : Cube = {i16(math.round(game.cam.position.x)),i16(math.round(game.cam.position.y)),i16(math.round(game.cam.position.z))}
     newPos := calcRay(currentPos,targetPosCubified,12,game,false)
         
-    if (rl.IsMouseButtonDown(.RIGHT)) {
+    if (rl.IsMouseButtonPressed(.RIGHT)) {
         if newPos != currentPos {
-            changeBlock(game,newPos,u8(game.playerChoosenBlock))
+            changeBlock(game,newPos,u8(game.playerChoosenBlock*2))
         }
     }
-    if (rl.IsMouseButtonDown(.LEFT)) {
+    if (rl.IsMouseButtonPressed(.LEFT)) {
         newPos = calcRay(currentPos,targetPosCubified,12,game,true)
         if newPos != currentPos {
             changeBlock(game,newPos,255)
@@ -91,17 +91,17 @@ updatePlayer :: proc(game : ^Game) {
     if rl.IsKeyDown(.H) {
         rl.rlDisableWireMode();
     }
-    if rl.IsKeyDown(.ONE) {
+    if rl.IsKeyPressed(.ONE) {
+        game.playerChoosenBlock += 1;
+    }
+    if rl.IsKeyPressed(.TWO) {
+        game.playerChoosenBlock -= 1;
+    }
+    if game.playerChoosenBlock == 13 {
+        game.playerChoosenBlock = 12;
+    }
+    if game.playerChoosenBlock == -1 {
         game.playerChoosenBlock = 0;
-    }
-    if rl.IsKeyDown(.TWO) {
-        game.playerChoosenBlock = 2;
-    }
-    if rl.IsKeyDown(.THREE) {
-        game.playerChoosenBlock = 4;
-    }
-    if rl.IsKeyDown(.FOUR) {
-        game.playerChoosenBlock = 6;
     }
     x : int = int(math.round(game.cam.position.x))
     y : int = int(math.round(game.cam.position.y))

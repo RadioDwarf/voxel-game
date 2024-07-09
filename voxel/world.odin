@@ -67,10 +67,10 @@ highLands :: proc(game : ^Game, x : i16, z : i16, structures : ^[dynamic] WorldS
 	for y : i16 = 1; y < 256; y+=1 { 
 		game.aliveCubes[x][y][z] = 255
 		if  ((y<80 && height2<0) || (y<81 && height2>=0)) {
-			game.aliveCubes[x][y][z] = 2
+			game.aliveCubes[x][y][z] = 1
 			if ((y==79 && height2<0) || (y==80 && height2>=0)) {
 				game.aliveCubes[x][y][z] = 0
-				game.aliveCubes[x][y-1][z] = 6
+				game.aliveCubes[x][y-1][z] = 4
 				
 				if rl.GetRandomValue(0,200)==1 {
 					append(structures,WorldStructure{x,y,z,0})	
@@ -80,11 +80,11 @@ highLands :: proc(game : ^Game, x : i16, z : i16, structures : ^[dynamic] WorldS
 			
 		}
 		else if  (y<=cast(i16)mountain_height+80 && y>79) {
-			game.aliveCubes[x][y][z] = 2
+			game.aliveCubes[x][y][z] = 1
 			
 			if (y==cast(i16)mountain_height+80) {
 				game.aliveCubes[x][y][z] = 0
-				game.aliveCubes[x][y-1][z] = 6
+				game.aliveCubes[x][y-1][z] = 4
 				
 				if rl.GetRandomValue(0,200)==1 {
 					append(structures,WorldStructure{x,y,z,0})	
@@ -216,9 +216,14 @@ updateWorld :: proc(game :^Game) {
         }
     }
 	updatePlayer(game);
+	leftItems : [dynamic]Entity
 	for val, index in game.items {
 		updateItem(game,&game.items[index])
+		if val.alive {
+			append(&leftItems, val)
+		}
 	}
+	game.items = leftItems
 }
 
 setupWorld :: proc(game : ^Game) {
