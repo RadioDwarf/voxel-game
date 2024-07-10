@@ -2,6 +2,7 @@ package voxel
 import rl "../raylib"
 import noise "../noise"
 import "core:fmt"
+import "core:encoding/json"
 
 import "core:os"
 import "core:strings"
@@ -16,11 +17,11 @@ loadStructure :: proc(filepath : string, type : string,game : ^Game) {
 
     it := string(data)
     cubes : [dynamic]Cube
-	types : [dynamic]u8
+	types : [dynamic]u16
 	for line in strings.split_lines_iterator(&it) {
         elements := strings.split(line," ",context.temp_allocator)
         cube := Cube{i16(strconv.atoi(elements[0])),i16(strconv.atoi(elements[1])),i16(strconv.atoi(elements[2]))}
-		type : u8 = u8(strconv.atoi(elements[3]))
+		type : u16 = u16(strconv.atoi(elements[3]))
 		append(&cubes,cube)
 		append(&types,type)
     }
@@ -28,6 +29,25 @@ loadStructure :: proc(filepath : string, type : string,game : ^Game) {
 		cubes,types
 	}
 	//fmt.println(game.structures[type])
+}
+TempData :: struct {
+	
+    aliveCubes : [1024][257][1024]u16,
+}
+
+saveWorld :: proc(game : Game, filepath : string) {
+	//temp := new(TempData)
+	//temp.aliveCubes = game.aliveCubes
+	if json_data, err := json.marshal(game, allocator = context.temp_allocator); err == nil {
+		// json_data is of type []byte,
+		// so can write it directly to a file:
+		if !os.write_entire_file("text.txt", json_data) {
+			fmt.println("Couldn't write file!")
+		}
+	} else {
+		fmt.println("Couldn't marshal struct!")
+	}
+	//free(temp)
 }
 genStructure :: proc(type : string, game : ^Game, x : i16, y : i16, z : i16) {
 	currentBlock : int = 0
@@ -53,7 +73,7 @@ flatLands :: proc(game : ^Game, x : i16, z : i16, structures : ^[dynamic] WorldS
 		}
 	}
 	if (rl.GetRandomValue(0,200)==1) {
-		treetype : u8 = 0
+		treetype : u16 = 0
 		if (rl.GetRandomValue(0,5)==1) {
 			treetype = 1
 		}
@@ -110,7 +130,7 @@ desert :: proc(game : ^Game, x : i16, z : i16, structures : ^[dynamic]WorldStruc
 				else if height < -0.6 {
 					game.aliveCubes[x][y][z] = 0
 					if (rl.GetRandomValue(0,100)==1) {
-						treetype : u8 = 0
+						treetype : u16 = 0
 						if (rl.GetRandomValue(0,5)==1) {
 							treetype = 1
 						}
@@ -180,7 +200,7 @@ genWorld :: proc(game : ^Game) {
         }    
     }
 }
-changeBlock :: proc(game : ^Game, pos : Cube, type : u8) {
+changeBlock :: proc(game : ^Game, pos : Cube, type : u16) {
 
     if (pos.x>-1 && pos.z > -1 && pos.y > -1) {
 		//check whether the block is air and needs to be replaced
@@ -188,8 +208,8 @@ changeBlock :: proc(game : ^Game, pos : Cube, type : u8) {
         if (game.aliveCubes[pos.x][pos.y][pos.z] == 255 && type != 255) || (game.aliveCubes[pos.x][pos.y][pos.z] != 255 && type == 255) { 
             chunkPos := Cube{i16(int(pos.x/16)),0,i16(int(pos.z/16))}
             if (type==255) {
-				fmt.println("a");
-				spawnItem(game,f32(pos.x),f32(pos.y),f32(pos.z), game.aliveCubes[pos.x][pos.y][pos.z])
+				//fmt.println("a");
+				//spawnItem(game,f32(pos.x),f32(pos.y),f32(pos.z), game.aliveCubes[pos.x][pos.y][pos.z])
 			}
 			game.aliveCubes[pos.x][pos.y][pos.z] = type
             

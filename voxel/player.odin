@@ -17,7 +17,6 @@ get_voxel_id :: proc(x: f32, y: f32, z: f32, game: ^Game) -> bool {
     }
     return false
 }
-
 // Calculates the ray and checks for voxel hits
 calcRay :: proc(pos: Cube, endPos: Cube, speed: f32, game: ^Game, mode : bool) -> Cube {
     direction := rl.Vector3Normalize(rl.Vector3{f32(endPos.x - pos.x), f32(endPos.y - pos.y), f32(endPos.z - pos.z)})
@@ -61,7 +60,7 @@ buildNDestroy :: proc(game : ^Game) {
         
     if (rl.IsMouseButtonPressed(.RIGHT)) {
         if newPos != currentPos {
-            changeBlock(game,newPos,u8(game.playerChoosenBlock*2))
+            changeBlock(game,newPos,u16(game.playerChoosenBlock*2))
         }
     }
     if (rl.IsMouseButtonPressed(.LEFT)) {
@@ -82,27 +81,8 @@ buildNDestroy :: proc(game : ^Game) {
 
     
 }
-updatePlayer :: proc(game : ^Game) {
-    rl.UpdateCamera(&game.cam,.FIRST_PERSON)
+collisions :: proc(game : ^Game) {
     
-    if rl.IsKeyDown(.G) {
-        rl.rlEnableWireMode()
-    }
-    if rl.IsKeyDown(.H) {
-        rl.rlDisableWireMode();
-    }
-    if rl.IsKeyPressed(.ONE) {
-        game.playerChoosenBlock += 1;
-    }
-    if rl.IsKeyPressed(.TWO) {
-        game.playerChoosenBlock -= 1;
-    }
-    if game.playerChoosenBlock == 13 {
-        game.playerChoosenBlock = 12;
-    }
-    if game.playerChoosenBlock == -1 {
-        game.playerChoosenBlock = 0;
-    }
     x : int = int(math.round(game.cam.position.x))
     y : int = int(math.round(game.cam.position.y))
     z : int = int(math.round(game.cam.position.z))
@@ -144,9 +124,37 @@ updatePlayer :: proc(game : ^Game) {
     else {
         game.y_velocity += 0.01
     }
-    
     game.cam.position.y -= game.y_velocity
     game.cam.target.y -= game.y_velocity
+    
+}
+godMode :: proc(game : ^Game) {
+    if rl.IsKeyDown(.G) {
+        rl.rlEnableWireMode()
+    }
+    if rl.IsKeyDown(.H) {
+        rl.rlDisableWireMode();
+    }
+    if rl.IsKeyPressed(.ONE) {
+        game.playerChoosenBlock += 1;
+    }
+    if rl.IsKeyPressed(.TWO) {
+        game.playerChoosenBlock -= 1;
+    }
+    if game.playerChoosenBlock == 13 {
+        game.playerChoosenBlock = 12;
+    }
+    if game.playerChoosenBlock == -1 {
+        game.playerChoosenBlock = 0;
+    }
+    if rl.IsKeyPressed(.C) {
+        saveWorld(game^,"data/worlds/world1.json")
+    }
+}
+updatePlayer :: proc(game : ^Game) {
+    rl.UpdateCamera(&game.cam,.FIRST_PERSON)
+    collisions(game);
+    godMode(game);
     buildNDestroy(game);
     //rl.DrawCube({f32(vec.x),f32(vec.y),f32(vec.z)}, 1,1,1,rl.RED)
 }

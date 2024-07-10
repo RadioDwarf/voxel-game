@@ -13,9 +13,9 @@ updateItem :: proc(game : ^Game, entity : ^Entity) {
         entity.y = f32(cubePos.y)+0.5;
     }
     entity.y+= entity.yVelocity;
-    rl.DrawCube({entity.x,entity.y,entity.z},0.3+0.1*sinOutput,0.3+0.1*sinOutput,0.3+0.1*sinOutput,game.colors[u8(entity.type)])
+    rl.DrawCube({entity.x,entity.y,entity.z},0.3+0.1*sinOutput,0.3+0.1*sinOutput,0.3+0.1*sinOutput,game.colors[u16(entity.type)])
     
 }
-spawnItem :: proc(game : ^Game, x : f32, y : f32, z : f32, type : u8) {
+spawnItem :: proc(game : ^Game, x : f32, y : f32, z : f32, type : u16) {
     append(&game.items,Entity{x,y,z,type,0,true});
 }

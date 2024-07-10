@@ -13,7 +13,7 @@ Entity :: struct {
     x : f32,
     y : f32,
     z : f32,
-    type : u8,
+    type : u16,
     yVelocity : f32,
     alive : bool
 }
@@ -27,21 +27,21 @@ Faces :: struct {
 }
 StructureData :: struct {
     poses : [dynamic]Cube,
-    types : [dynamic]u8
+    types : [dynamic]u16
 }
 Game :: struct #packed {
     cam : rl.Camera3D,
     y_velocity : f32,
     playerChoosenBlock : int,
-    aliveCubes : [1024][257][1024]u8,
+    aliveCubes : [1024][257][1024]u16,
     meshes : [64][64]rl.Mesh,
     material : rl.Material,
     renderDistance : i16,
     items : [dynamic]Entity,
     structures : map[string]StructureData,
     tick : int,
-    cords : map[u8]Rect, //for chunk meshes
-	colors : map[u8]rl.Color, //for items
+    cords : map[u16]Rect, //for chunk meshes
+	colors : map[u16]rl.Color, //for items
 }
 ChunkModel :: struct {
     vertex_count : int,
@@ -51,5 +51,5 @@ WorldStructure :: struct {
 	x : i16,
 	y : i16,
 	z : i16,
-	kind : u8
+	kind : u16
 }

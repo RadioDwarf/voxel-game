@@ -103,7 +103,7 @@ addCube :: proc(model : ^ChunkModel, mesh : ^rl.Mesh, x : f32, y : f32, z : f32,
     
 }
 
-genMesh :: proc(_blocks : [dynamic]Cube, _faces : [dynamic]Faces, _types : [dynamic]u8, _ambients : [dynamic]Faces, game : ^Game) -> rl.Mesh {
+genMesh :: proc(_blocks : [dynamic]Cube, _faces : [dynamic]Faces, _types : [dynamic]u16, _ambients : [dynamic]Faces, game : ^Game) -> rl.Mesh {
     mesh : rl.Mesh
     trang_count : i32 = 0
     //count the trang count
@@ -156,7 +156,7 @@ genChunkModel :: proc(game : ^Game, x : i16, y : i16, z : i16) {
 	//setup data
     blocks : [dynamic]Cube
     faces : [dynamic]Faces
-    types : [dynamic]u8
+    types : [dynamic]u16
     ambients : [dynamic]Faces
     //go through the chunk size
     for chunkx : i16 = 0; chunkx < 16; chunkx+=1 {
