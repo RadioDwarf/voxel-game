@@ -123,8 +123,14 @@ genMesh :: proc(_blocks : [dynamic]Cube, _faces : [dynamic]Faces, _types : [dyna
     //go through blocks and add the data to the mesh
     index : int = 0
     for block in _blocks {
-        addCube(&model, &mesh, cast(f32)block.x,cast(f32)block.y,cast(f32)block.z,1,1,1,game.cords[_types[index]].x,game.cords[_types[index]].y, _faces[index], _ambients[index])
+        if game.modelTypes[_types[index]] == "block" {
+            addCube(&model, &mesh, cast(f32)block.x,cast(f32)block.y,cast(f32)block.z,1,1,1,game.cords[_types[index]].x,game.cords[_types[index]].y, _faces[index], _ambients[index])
 
+        }
+        else {
+            addCube(&model, &mesh, cast(f32)block.x+0.325,cast(f32)block.y,cast(f32)block.z+0.325,0.35,1,0.35,game.cords[_types[index]].x,game.cords[_types[index]].y, _faces[index], _ambients[index])
+
+        }
         index+=1
     }
     rl.UploadMesh(&mesh,false)
@@ -132,24 +138,27 @@ genMesh :: proc(_blocks : [dynamic]Cube, _faces : [dynamic]Faces, _types : [dyna
 }
 checkObscures :: proc(game : ^Game, x : i16, y : i16, z : i16) -> Faces {
     faces : Faces = {false, false, false, false, false, false}
-    if (z+1 < 1024) { if (game.aliveCubes[x][y][z+1]!=255) { faces.back = true } } // back
-    if (z-1> -1) { if (game.aliveCubes[x][y][z-1]!=255) { faces.front = true } } // front
-    if (y+1 < 256) { if (game.aliveCubes[x][y+1][z]!=255) { faces.top = true } } // top
-    if (y-1 > -1) { if (game.aliveCubes[x][y-1][z]!=255) { faces.bottom = true } } // bottom
-    if (x-1 > -1) { if (game.aliveCubes[x-1][y][z]!=255) { faces.left = true } } // left
-    if (x+1 < 1024) { if (game.aliveCubes[x+1][y][z]!=255) { faces.right = true } } // right
+    if (z+1 < 1024) { if (game.aliveCubes[x][y][z+1]!=255 && game.modelTypes[game.aliveCubes[x][y][z+1]]=="block") { faces.back = true } } // back
+    if (z-1> -1) { if (game.aliveCubes[x][y][z-1]!=255 && game.modelTypes[game.aliveCubes[x][y][z-1]]=="block") { faces.front = true } } // front
+    if (y+1 < 256) { if (game.aliveCubes[x][y+1][z]!=255 && game.modelTypes[game.aliveCubes[x][y+1][z]]=="block") { faces.top = true } } // top
+    if (y-1 > -1) { if (game.aliveCubes[x][y-1][z]!=255 && game.modelTypes[game.aliveCubes[x][y-1][z]]=="block") { faces.bottom = true } } // bottom
+    if (x-1 > -1) { if (game.aliveCubes[x-1][y][z]!=255 && game.modelTypes[game.aliveCubes[x-1][y][z]]=="block") { faces.left = true } } // left
+    if (x+1 < 1024) { if (game.aliveCubes[x+1][y][z]!=255 && game.modelTypes[game.aliveCubes[x+1][y][z]]=="block") { faces.right = true } } // right
 
     return faces
 }
 checkAmbience :: proc(game : ^Game, x : i16, y : i16, z : i16) -> Faces {
     faces : Faces = {false, false, false, false, false, false} //I reuse the data type for simplicity sake 
-    if (y+1<256) {
-        if (z+1 < 1024) { if (game.aliveCubes[x][y+1][z+1]!=255) { faces.back = true } } // back
-        if (z-1 > 0) { if (game.aliveCubes[x][y+1][z-1]!=255) { faces.front = true } } // front
-        if (x > 0) { if (game.aliveCubes[x-1][y+1][z]!=255) { faces.left = true } } // left
-        if (x+1 < 1024) { if (game.aliveCubes[x+1][y+1][z]!=255) { faces.right = true } } // right
-    }
+    if game.modelTypes[game.aliveCubes[x][y][z]] == "block" {
+        if (y+1<256) {
+            if (z+1 < 1024) { if (game.aliveCubes[x][y+1][z+1]!=255) { faces.back = true } } // back
+            if (z-1 > 0) { if (game.aliveCubes[x][y+1][z-1]!=255) { faces.front = true } } // front
+            if (x > 0) { if (game.aliveCubes[x-1][y+1][z]!=255) { faces.left = true } } // left
+            if (x+1 < 1024) { if (game.aliveCubes[x+1][y+1][z]!=255) { faces.right = true } } // right
+        }
     
+    }
+     
     return faces
 }
 genChunkModel :: proc(game : ^Game, x : i16, y : i16, z : i16) {
