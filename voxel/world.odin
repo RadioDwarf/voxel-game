@@ -209,7 +209,7 @@ changeBlock :: proc(game : ^Game, pos : Cube, type : u16) {
             chunkPos := Cube{i16(int(pos.x/16)),0,i16(int(pos.z/16))}
             if (type==255) {
 				//fmt.println("a");
-				spawnItem(game,f32(pos.x),f32(pos.y),f32(pos.z), game.aliveCubes[pos.x][pos.y][pos.z])
+				//spawnItem(game,f32(pos.x),f32(pos.y),f32(pos.z), game.aliveCubes[pos.x][pos.y][pos.z])
 			}
 			game.aliveCubes[pos.x][pos.y][pos.z] = type
             
@@ -223,8 +223,8 @@ changeBlock :: proc(game : ^Game, pos : Cube, type : u16) {
 }
 
 updateWorld :: proc(game :^Game) {
-	chunkCamX := cast(i16)game.player.cam.position.x/16
-    chunkCamZ := cast(i16)game.player.cam.position.z/16
+	chunkCamX := cast(i16)game.cam.position.x/16
+    chunkCamZ := cast(i16)game.cam.position.z/16
     for x : i16 = chunkCamX-game.renderDistance; x < game.renderDistance+chunkCamX; x+=1 {
 		for z : i16 = chunkCamZ-game.renderDistance; z < game.renderDistance+chunkCamZ; z+=1 {
 			if (x>-1 && x < 64 && z > -1 && z < 64) {
@@ -235,13 +235,15 @@ updateWorld :: proc(game :^Game) {
                 
         }
     }
-	updatePlayer(&game.player,game);
+	updatePlayer(game);
+	leftItems : [dynamic]Entity
 	for val, index in game.items {
 		updateItem(game,&game.items[index])
-		if !val.alive {
-			defer ordered_remove(&game.items,index)
+		if val.alive {
+			append(&leftItems, val)
 		}
 	}
+	game.items = leftItems
 }
 
 setupWorld :: proc(game : ^Game) {

@@ -2,12 +2,12 @@ package voxel
 import rl "../raylib"
 import "core:math"
 import "core:fmt"
-import "core:unicode/utf8"
+
 // Vector structure for 3D coordinates
 
 // Normalizes a vector
 
-COLLOFSSET :: #config(COLLOFSSET, 0.068)
+COLLOFSSET :: #config(COLLOFSSET, 0.05)
 COLLSIZE :: #config(COLLSIZE,0.5)
 // Checks if a voxel exists at the given position in the game's voxel array
 get_voxel_id :: proc(x: f32, y: f32, z: f32, game: ^Game) -> bool {
@@ -51,16 +51,16 @@ calcRay :: proc(pos: Cube, endPos: Cube, speed: f32, game: ^Game, mode : bool) -
     // No hit
     return pos
 }
-buildNDestroy :: proc(player : ^Player,game : ^Game) {
-    targetPos := player.cam.target-player.cam.position
-    targetPos+= player.cam.position
+buildNDestroy :: proc(game : ^Game) {
+    targetPos := game.cam.target-game.cam.position
+    targetPos+= game.cam.position
     targetPosCubified := Cube{i16(math.round(targetPos.x)),i16(math.round(targetPos.y)),i16(math.round(targetPos.z))}
-    currentPos : Cube = {i16(math.round(player.cam.position.x)),i16(math.round(player.cam.position.y)),i16(math.round(player.cam.position.z))}
+    currentPos : Cube = {i16(math.round(game.cam.position.x)),i16(math.round(game.cam.position.y)),i16(math.round(game.cam.position.z))}
     newPos := calcRay(currentPos,targetPosCubified,12,game,false)
         
     if (rl.IsMouseButtonPressed(.RIGHT)) {
         if newPos != currentPos {
-            changeBlock(game,newPos,u16(player.playerChoosenBlock*2))
+            changeBlock(game,newPos,u16(game.playerChoosenBlock*2))
         }
     }
     if (rl.IsMouseButtonPressed(.LEFT)) {
@@ -81,99 +81,80 @@ buildNDestroy :: proc(player : ^Player,game : ^Game) {
 
     
 }
-collisions :: proc(player : ^Player, game : ^Game) {
+collisions :: proc(game : ^Game) {
     
-    x : int = int(math.round(player.cam.position.x))
-    y : int = int(math.round(player.cam.position.y))
-    z : int = int(math.round(player.cam.position.z))
+    x : int = int(math.round(game.cam.position.x))
+    y : int = int(math.round(game.cam.position.y))
+    z : int = int(math.round(game.cam.position.z))
     
-    if game.aliveCubes[int(math.round(player.cam.position.x-COLLSIZE))][y-1][z]!=255 || game.aliveCubes[int(math.round(player.cam.position.x-COLLSIZE))][y][z]!=255 {
-        player.cam.position.x = f32(x) + COLLOFSSET;
-        player.cam.target.x += COLLOFSSET;
+    if game.aliveCubes[int(math.round(game.cam.position.x-COLLSIZE))][y-1][z]!=255 || game.aliveCubes[int(math.round(game.cam.position.x-COLLSIZE))][y][z]!=255 {
+        game.cam.position.x = f32(x) + COLLOFSSET;
+        game.cam.target.x += COLLOFSSET;
     }
-    if game.aliveCubes[int(math.round(player.cam.position.x+COLLSIZE))][y-1][z]!=255 || game.aliveCubes[int(math.round(player.cam.position.x+COLLSIZE))][y][z]!=255 {
-        player.cam.position.x = f32(x) -COLLOFSSET;
-        player.cam.target.x -= COLLOFSSET;
+    if game.aliveCubes[int(math.round(game.cam.position.x+COLLSIZE))][y-1][z]!=255 || game.aliveCubes[int(math.round(game.cam.position.x+COLLSIZE))][y][z]!=255 {
+        game.cam.position.x = f32(x) -COLLOFSSET;
+        game.cam.target.x -= COLLOFSSET;
     }
-    if game.aliveCubes[x][y-1][int(math.round(player.cam.position.z-COLLSIZE))]!=255 || game.aliveCubes[x][y][int(math.round(player.cam.position.z-COLLSIZE))]!=255 {
-        player.cam.position.z = f32(z) + COLLOFSSET;
-        player.cam.target.z += COLLOFSSET;
+    if game.aliveCubes[x][y-1][int(math.round(game.cam.position.z-COLLSIZE))]!=255 || game.aliveCubes[x][y][int(math.round(game.cam.position.z-COLLSIZE))]!=255 {
+        game.cam.position.z = f32(z) + COLLOFSSET;
+        game.cam.target.z += COLLOFSSET;
     }
-    if game.aliveCubes[x][y-1][int(math.round(player.cam.position.z+COLLSIZE))]!=255 || game.aliveCubes[x][y][int(math.round(player.cam.position.z+COLLSIZE))]!=255 {
-        player.cam.position.z = f32(z) - COLLOFSSET;
-        player.cam.target.z -= COLLOFSSET;
+    if game.aliveCubes[x][y-1][int(math.round(game.cam.position.z+COLLSIZE))]!=255 || game.aliveCubes[x][y][int(math.round(game.cam.position.z+COLLSIZE))]!=255 {
+        game.cam.position.z = f32(z) - COLLOFSSET;
+        game.cam.target.z -= COLLOFSSET;
     }
     colldFromTop : bool = false;
     if (y>-1 && y<256) {
         if (game.aliveCubes[x][y][z]!=255) {
-            player.y_velocity *= -0.5;
+            game.y_velocity *= -0.5;
             colldFromTop = true;
         }
     }
     if (y-2<256 && y-2>-1) {
         if (game.aliveCubes[x][y-2][z]==255) {
-            player.y_velocity += 0.01
+            game.y_velocity += 0.01
         }
         else {
-            player.y_velocity = 0
+            game.y_velocity = 0
             if rl.IsKeyDown(.SPACE) && !colldFromTop {
-                player.y_velocity -= 0.2
+                game.y_velocity -= 0.2
             }
         }
     }
     else {
-        player.y_velocity += 0.01
+        game.y_velocity += 0.01
     }
-    player.cam.position.y -= player.y_velocity
-    player.cam.target.y -= player.y_velocity
+    game.cam.position.y -= game.y_velocity
+    game.cam.target.y -= game.y_velocity
     
 }
-godMode :: proc(player : ^Player, game : ^Game) {
-    if rl.IsKeyPressed(.SLASH) {
-        player.openedConsole = !player.openedConsole
-        fmt.println("\n")
-        player.consoleText = ""
+godMode :: proc(game : ^Game) {
+    if rl.IsKeyDown(.G) {
+        rl.rlEnableWireMode()
+    }
+    if rl.IsKeyDown(.H) {
+        rl.rlDisableWireMode();
     }
     if rl.IsKeyPressed(.ONE) {
-        player.playerChoosenBlock += 1;
+        game.playerChoosenBlock += 1;
     }
     if rl.IsKeyPressed(.TWO) {
-        player.playerChoosenBlock -= 1;
+        game.playerChoosenBlock -= 1;
     }
-    if player.playerChoosenBlock == 13 {
-        player.playerChoosenBlock = 12;
+    if game.playerChoosenBlock == 13 {
+        game.playerChoosenBlock = 12;
     }
-    if player.playerChoosenBlock == -1 {
-        player.playerChoosenBlock = 0;
+    if game.playerChoosenBlock == -1 {
+        game.playerChoosenBlock = 0;
     }
-    //if rl.IsKeyPressed(.C) {
-    //    saveWorld(game^,"data/worlds/world1.json")
-    //}
+    if rl.IsKeyPressed(.C) {
+        saveWorld(game^,"data/worlds/world1.json")
+    }
 }
-updatePlayer :: proc(player : ^Player,game : ^Game) {
-    if !player.openedConsole {
-        rl.UpdateCamera(&player.cam,.FIRST_PERSON)
-    }
-    collisions(player,game);
-    godMode(player,game);
-    buildNDestroy(player,game);
-    rl.EndMode3D()
-    if player.openedConsole {
-        rl.DrawRectangle(0,750,1200,32,rl.GRAY)
-        key : string = utf8.runes_to_string({rl.GetCharPressed()})
-        if key != "" {
-            fmt.print(key)
-        }
-        if rl.IsKeyPressed(.ENTER) {
-            player.openedConsole = false
-            player.consoleText = ""
-        }
-    }
-    else {
-        rl.DrawRectangle(599-64/2,699,66,66,rl.BLACK)
-        rl.DrawRectangle(600-64/2,700,64,64,game.colors[u16(game.player.playerChoosenBlock*2)])
-        
-    }
-    rl.BeginMode3D(player.cam)
+updatePlayer :: proc(game : ^Game) {
+    rl.UpdateCamera(&game.cam,.FIRST_PERSON)
+    collisions(game);
+    godMode(game);
+    buildNDestroy(game);
     //rl.DrawCube({f32(vec.x),f32(vec.y),f32(vec.z)}, 1,1,1,rl.RED)
 }
