@@ -14,6 +14,11 @@ updateItem :: proc(game : ^Game, entity : ^Entity) {
     }
     entity.y+= entity.yVelocity;
     rl.DrawCube({entity.x,entity.y,entity.z},0.3+0.1*sinOutput,0.3+0.1*sinOutput,0.3+0.1*sinOutput,game.colors[u16(entity.type)])
+
+    if i32(math.round_f32(game.player.cam.position.x)) == i32(math.round_f32(entity.x)) && i32(math.round_f32(game.player.cam.position.y))-1 == i32(math.round_f32(entity.y)) && i32(math.round_f32(game.player.cam.position.z)) == i32(math.round_f32(entity.z)) {
+        fmt.println("a")
+        entity.alive = false;
+    }
     
 }
 spawnItem :: proc(game : ^Game, x : f32, y : f32, z : f32, type : u16) {
